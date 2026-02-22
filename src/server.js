@@ -38,8 +38,11 @@ app.use(
       const isLocalhostDevOrigin = /^https?:\/\/(localhost|127\.0\.0\.1):\d+$/.test(
         normalizedOrigin
       );
+      const isVercelOrigin = /^https:\/\/[a-z0-9-]+\.vercel\.app$/i.test(
+        normalizedOrigin
+      );
 
-      if (isConfiguredOrigin || isLocalhostDevOrigin) {
+      if (isConfiguredOrigin || isLocalhostDevOrigin || isVercelOrigin) {
         return callback(null, true);
       }
 
@@ -57,6 +60,10 @@ app.get("/api/health", (req, res) => {
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/users", require("./routes/userRoutes"));
 app.use("/api/messages", require("./routes/messageRoutes"));
+
+app.use("/auth", require("./routes/authRoutes"));
+app.use("/users", require("./routes/userRoutes"));
+app.use("/messages", require("./routes/messageRoutes"));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
