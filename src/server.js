@@ -13,6 +13,15 @@ const allowedOrigins = (process.env.CLIENT_URL || "")
   .map((value) => value.trim())
   .filter(Boolean);
 
+const normalizeOrigin = (value) => {
+  if (!value) return "";
+  return value.replace(/\/$/, "");
+};
+
+const normalizedAllowedOrigins = new Set(
+  allowedOrigins.map((origin) => normalizeOrigin(origin))
+);
+
 app.use(
   cors({
     origin: (origin, callback) => {
@@ -20,8 +29,15 @@ app.use(
         return callback(null, true);
       }
 
-      const isConfiguredOrigin = allowedOrigins.includes(origin);
-      const isLocalhostDevOrigin = /^http:\/\/localhost:\d+$/.test(origin);
+      if (normalizedAllowedOrigins.size === 0) {
+        return callback(null, true);
+      }
+
+      const normalizedOrigin = normalizeOrigin(origin);
+      const isConfiguredOrigin = normalizedAllowedOrigins.has(normalizedOrigin);
+      const isLocalhostDevOrigin = /^https?:\/\/(localhost|127\.0\.0\.1):\d+$/.test(
+        normalizedOrigin
+      );
 
       if (isConfiguredOrigin || isLocalhostDevOrigin) {
         return callback(null, true);
@@ -45,4 +61,7 @@ app.use("/api/messages", require("./routes/messageRoutes"));
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  if (normalizedAllowedOrigins.size === 0) {
+    console.warn("CLIENT_URL is not configured. CORS is currently open to all origins.");
+  }
 });
