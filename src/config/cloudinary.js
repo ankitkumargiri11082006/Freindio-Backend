@@ -6,13 +6,13 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const uploadToCloudinary = async (file) => {
+const uploadToCloudinary = async (file, folder = "chat-app/messages") => {
   const mimeType = file.mimetype || "image/png";
   const base64 = file.buffer.toString("base64");
   const dataUri = `data:${mimeType};base64,${base64}`;
 
   const result = await cloudinary.uploader.upload(dataUri, {
-    folder: "chat-app/messages",
+    folder,
   });
 
   return result.secure_url;

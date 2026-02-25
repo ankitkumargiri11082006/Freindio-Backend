@@ -12,6 +12,15 @@ const getConversation = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
+    await Message.updateMany(
+      {
+        sender: otherUserId,
+        receiver: currentUserId,
+        isRead: false,
+      },
+      { $set: { isRead: true } }
+    );
+
     const messages = await Message.find({
       $or: [
         { sender: currentUserId, receiver: otherUserId },

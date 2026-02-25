@@ -8,7 +8,7 @@ const createToken = (id) => {
 
 const signup = async (req, res) => {
   try {
-    const { name, userId, password } = req.body;
+    const { name, userId, password, caption } = req.body;
 
     if (!userId || !password) {
       return res.status(400).json({ message: "All fields are required" });
@@ -30,6 +30,7 @@ const signup = async (req, res) => {
       name: (name || "Anonymous").trim(),
       userId: userId.trim(),
       password: hashedPassword,
+      caption: (caption || "").trim().slice(0, 120),
     });
 
     const token = createToken(user._id);
@@ -39,6 +40,8 @@ const signup = async (req, res) => {
         id: user._id,
         name: user.name,
         userId: user.userId,
+        profilePhoto: user.profilePhoto || "",
+        caption: user.caption || "",
       },
     });
   } catch (error) {
@@ -80,6 +83,8 @@ const login = async (req, res) => {
         id: user._id,
         name: user.name,
         userId: user.userId,
+        profilePhoto: user.profilePhoto || "",
+        caption: user.caption || "",
       },
     });
   } catch (error) {
